@@ -10,9 +10,6 @@ import java.util.List;
  */
 public class Utils {
     public static List<Point> normalize(List<Point> data, int goalSize) {
-
-        Log.d("debug", "[normalize] size: " + data.size() + " to " + goalSize);
-
         List<Point> result = new ArrayList<>();
 
         for (int i = 0; i < goalSize; i++) {
@@ -24,8 +21,6 @@ public class Utils {
 
             int ceil_ii = (int) Math.ceil(ii);
             double part2 = ii - (int) Math.floor(ii);
-
-            Log.d("debug", " ii = " + ii + " floor_ii = " + floor_ii + " ceil_ii = " + ceil_ii);
 
             point.x = data.get(floor_ii).x * part1 + data.get(ceil_ii).x * part2;
             point.y = data.get(floor_ii).y * part1 + data.get(ceil_ii).y * part2;

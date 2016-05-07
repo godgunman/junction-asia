@@ -1,7 +1,9 @@
 package asia.junction.naruto_go;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.BufferedWriter;
@@ -16,6 +18,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,6 +26,10 @@ import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 
 public class MainActivity extends Activity {
 
@@ -45,6 +52,7 @@ public class MainActivity extends Activity {
 
     private List<List<Point>> allTrainingDataSet;
     private List<Point> currentTrainingDataSet;
+    private Socket socket;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,6 +62,7 @@ public class MainActivity extends Activity {
         findViews();
         initButtonListener();
         initSensorManager();
+        socketInit();
 
         allTrainingDataSet = new ArrayList<>();
     }
@@ -89,7 +98,14 @@ public class MainActivity extends Activity {
                         allTrainingDataSet.add(currentTrainingDataSet);
 
                         try {
-                            FileOutputStream fos = openFileOutput("data_" + allTrainingDataSet.size() + ".text", MODE_APPEND);
+                            File dir = Environment.getExternalStorageDirectory();
+                            dir = new File(dir, "naruto_go");
+                            File file = new File(dir, "data_" + allTrainingDataSet.size() + ".text");
+                            if (dir.exists() == false) {
+                                dir.mkdirs();
+                            }
+
+                            FileOutputStream fos = new FileOutputStream(file);
                             bw = new BufferedWriter(new OutputStreamWriter(fos));
                             bw.write(Utils.trainingDataToString(currentTrainingDataSet));
                             bw.flush();
@@ -185,6 +201,35 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void socketInit() {
+        try {
+            socket = IO.socket("http://localhost");
+            socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+
+                @Override
+                public void call(Object... args) {
+                    socket.emit("foo", "hi");
+//                    socket.disconnect();
+                }
+
+            }).on("event", new Emitter.Listener() {
+
+                @Override
+                public void call(Object... args) {}
+
+            }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+
+                @Override
+                public void call(Object... args) {}
+
+            });
+            socket.connect();
+
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     protected void onResume() {
         // TODO Auto-generated method stub
@@ -243,6 +288,10 @@ public class MainActivity extends Activity {
                     Math.abs(preY - y) < threshold &&
                     Math.abs(preZ - z) < threshold) {
                 return;
+            }
+
+            if (socket.connected()) {
+                socket.emit("onSensorChanged", String.format("%f,%f,%f",x,y,z));
             }
 
             textX.setText("X: " + String.valueOf(x));
