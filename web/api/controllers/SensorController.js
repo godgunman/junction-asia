@@ -8,12 +8,14 @@
 module.exports = {
 
     change: function(req, res) {
-        if (!req.isSocket) {
-            return res.badRequest();
-        }
-        sails.sockets.join(req, 'funSockets');
-        sails.sockets.broadcast('funSockets', 'hello', req);
-        return res.json({status: 'done.'});
+//        sails.sockets.join(req, 'funSockets');
+//        sails.sockets.broadcast('funSockets', 'hello', req);
+        var io = sails.io;
+        io.sockets.emit('change', req.query);
+
+        return res.json({
+            status: 'done.'
+        });
     }
 };
 
