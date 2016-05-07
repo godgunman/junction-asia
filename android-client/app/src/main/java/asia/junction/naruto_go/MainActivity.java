@@ -38,19 +38,19 @@ import io.socket.emitter.Emitter;
 
 public class MainActivity extends Activity {
     private static final int WRITE_EXTERNAL_STORAGE_CODE = 10013;
+    private static final int NORMALIZE_SIZE = 150;
+
 
     private SensorManager sensorManager;
     private boolean accelerometerPresent;
     private Sensor accelerometerSensor;
 
     private File dir, file;
-    private TextView textX, textY, textZ, inD;
+    private TextView textX, textY, textZ;
     private Button learnBtn, predictBtn, restartBtn;
     private EditText label;
 
     boolean startTraining = false;
-
-    private int index = -2;
 
     private List<Point> currentDataSet;
     private Socket socket;
@@ -117,12 +117,11 @@ public class MainActivity extends Activity {
         textX = (TextView) findViewById(R.id.textx);
         textY = (TextView) findViewById(R.id.texty);
         textZ = (TextView) findViewById(R.id.textz);
-        inD = (TextView) findViewById(R.id.inD);
 
         learnBtn = (Button) findViewById(R.id.learn);
         predictBtn = (Button) findViewById(R.id.predict);
         restartBtn = (Button) findViewById(R.id.restart);
-        label = (EditText)findViewById(R.id.label);
+        label = (EditText) findViewById(R.id.label);
     }
 
     private void initButtonListener() {
@@ -136,7 +135,7 @@ public class MainActivity extends Activity {
                         currentDataSet = new ArrayList<>();
                         break;
                     case MotionEvent.ACTION_UP:
-                        currentDataSet = Utils.normalize(currentDataSet, 50);
+                        currentDataSet = Utils.normalize(currentDataSet, NORMALIZE_SIZE);
 
                         String labelText = label.getText().toString();
                         if (labelText.length() == 0)
@@ -171,6 +170,7 @@ public class MainActivity extends Activity {
                                     output.toString()
                             });
                             label.setText(String.valueOf(result));
+                            Utils.sendResultToServer(result);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -216,12 +216,14 @@ public class MainActivity extends Activity {
             }).on("event", new Emitter.Listener() {
 
                 @Override
-                public void call(Object... args) {}
+                public void call(Object... args) {
+                }
 
             }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
 
                 @Override
-                public void call(Object... args) {}
+                public void call(Object... args) {
+                }
 
             });
             socket.connect();
@@ -265,9 +267,11 @@ public class MainActivity extends Activity {
 
     private SensorEventListener accelerometerListener = new SensorEventListener() {
 
-        boolean isFirst;
-        double threshold = 1.3;
+        boolean isFirst = true;
+        double threshold = 0.7;
         double preX, preY, preZ;
+        double maxX = Double.MIN_VALUE, maxY = Double.MIN_VALUE, maxZ = Double.MIN_VALUE;
+        double minX = Double.MAX_VALUE, minY = Double.MAX_VALUE, minZ = Double.MAX_VALUE;
 
         @Override
         public void onAccuracyChanged(Sensor arg0, int arg1) {
@@ -283,8 +287,10 @@ public class MainActivity extends Activity {
             double y = event.values[1];
             double z = event.values[2];
 
+
             if (isFirst) {
                 isFirst = false;
+                maxX = x;
             } else if (Math.abs(preX - x) < threshold &&
                     Math.abs(preY - y) < threshold &&
                     Math.abs(preZ - z) < threshold) {
@@ -292,13 +298,20 @@ public class MainActivity extends Activity {
             }
 
             if (socket.connected()) {
-                socket.emit("onSensorChanged", String.format("%f,%f,%f",x,y,z));
+                socket.emit("onSensorChanged", String.format("%f,%f,%f", x, y, z));
             }
 
-            textX.setText("X: " + String.valueOf(x));
-            textY.setText("Y: " + String.valueOf(y));
-            textZ.setText("Z: " + String.valueOf(z));
-            inD.setText("ind: " + index);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+            maxZ = Math.max(maxZ, z);
+
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            minZ = Math.min(minZ, z);
+
+            textX.setText(String.format("X:%+8.3f  MAX:%+8.3f  MIN:%+8.3f", x, maxX, minX));
+            textY.setText(String.format("Y:%+8.3f  MAX:%+8.3f  MIN:%+8.3f", y, maxY, minY));
+            textZ.setText(String.format("Z:%+8.3f  MAX:%+8.3f  MIN:%+8.3f", z, maxZ, minZ));
             if (startTraining) {
                 currentDataSet.add(new Point(x, y, z));
             }
