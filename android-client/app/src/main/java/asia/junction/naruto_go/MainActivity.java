@@ -11,14 +11,18 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -32,6 +36,7 @@ import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
 public class MainActivity extends Activity {
+    private static final int WRITE_EXTERNAL_STORAGE_CODE = 10013;
 
     private SensorManager sensorManager;
     private boolean accelerometerPresent;
@@ -60,12 +65,28 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        requestPermissionsIfDenied();
         findViews();
         initButtonListener();
         initSensorManager();
         socketInit();
 
         allTrainingDataSet = new ArrayList<>();
+    }
+
+    private void requestPermissionsIfDenied() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            } else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        WRITE_EXTERNAL_STORAGE_CODE);
+            }
+        }
     }
 
     private void findViews() {
