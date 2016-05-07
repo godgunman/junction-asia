@@ -209,11 +209,12 @@ public class MainActivity extends Activity {
 
     private void socketInit() {
         try {
-            socket = IO.socket("http://localhost");
+            socket = IO.socket("http://192.168.43.83:1337");
             socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 
                 @Override
                 public void call(Object... args) {
+                    Log.d("[socket.io]", "EVENT_CONNECT");
                     socket.emit("foo", "hi");
 //                    socket.disconnect();
                 }
