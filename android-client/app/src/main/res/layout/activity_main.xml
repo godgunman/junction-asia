@@ -44,13 +44,28 @@
         android:id="@+id/label" />
 
     <Button
-        android:id="@+id/btn"
+        android:id="@+id/learn"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
 		android:layout_weight="1"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
-        android:text="learn"
-        />
+        android:text="learn" />
+
+    <Button
+        android:id="@+id/predict"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:text="predict" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Restart"
+        android:id="@+id/restart"
+        android:layout_gravity="center_horizontal" />
 
 </LinearLayout>

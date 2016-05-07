@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
@@ -43,22 +42,17 @@ public class MainActivity extends Activity {
     private SensorManager sensorManager;
     private boolean accelerometerPresent;
     private Sensor accelerometerSensor;
-    private BufferedWriter bw;
 
-    private File file;
+    private File dir, file;
     private TextView textX, textY, textZ, inD;
-    private Button btn;
+    private Button learnBtn, predictBtn, restartBtn;
     private EditText label;
 
     boolean startTraining = false;
-    boolean controlFile = false;
-
-    private int trainingDataSetCounter = 0;
 
     private int index = -2;
 
-    private List<List<Point>> allTrainingDataSet;
-    private List<Point> currentTrainingDataSet;
+    private List<Point> currentDataSet;
     private Socket socket;
 
     @Override
@@ -67,13 +61,11 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         requestPermissionsIfDenied();
-        createOutputFile();
+        createOutputFile("train");
         findViews();
         initButtonListener();
         initSensorManager();
         socketInit();
-
-        allTrainingDataSet = new ArrayList<>();
     }
 
     private void requestPermissionsIfDenied() {
@@ -91,13 +83,33 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void createOutputFile() {
-        File dir = Environment.getExternalStorageDirectory();
-        dir = new File(dir, "naruto_go");
+    private void createOutputFile(String prefix) {
+        if (null == dir) {
+            dir = new File(Environment.getExternalStorageDirectory(), "naruto_go");
+        }
         SimpleDateFormat dateFmt = new SimpleDateFormat("yyyyMMddhhmmss");
-        file = new File(dir, "train" + dateFmt.format(new Date()) + ".data");
+        file = new File(dir, prefix + dateFmt.format(new Date()) + ".data");
         if (dir.exists() == false) {
             dir.mkdirs();
+        }
+    }
+
+
+    private void writeToFile(String output, File outputFile) {
+        writeToFile(output, outputFile, false);
+    }
+
+    private void writeToFile(String output, File outputFile, boolean append) {
+        try {
+            FileOutputStream fos = new FileOutputStream(outputFile, append);
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+            bw.write(output);
+            bw.newLine();
+            bw.flush();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -107,73 +119,71 @@ public class MainActivity extends Activity {
         textZ = (TextView) findViewById(R.id.textz);
         inD = (TextView) findViewById(R.id.inD);
 
-        btn = (Button) findViewById(R.id.btn);
+        learnBtn = (Button) findViewById(R.id.learn);
+        predictBtn = (Button) findViewById(R.id.predict);
+        restartBtn = (Button) findViewById(R.id.restart);
         label = (EditText)findViewById(R.id.label);
     }
 
     private void initButtonListener() {
-        btn.setOnTouchListener(new OnTouchListener() {
+        learnBtn.setOnTouchListener(new OnTouchListener() {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         startTraining = true;
-                        currentTrainingDataSet = new ArrayList<>();
+                        currentDataSet = new ArrayList<>();
                         break;
                     case MotionEvent.ACTION_UP:
-                        currentTrainingDataSet = Utils.normalize(currentTrainingDataSet, 50);
-                        allTrainingDataSet.add(currentTrainingDataSet);
+                        currentDataSet = Utils.normalize(currentDataSet, 50);
 
+                        String labelText = label.getText().toString();
+                        if (labelText.length() == 0)
+                            labelText = "0";
+                        writeToFile(Utils.dataToString(currentDataSet, labelText), file, true);
+                }
+                // TODO Auto-generated method stub
+                return false;
+            }
+        });
+
+        predictBtn.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        startTraining = true;
+                        currentDataSet = new ArrayList<>();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        currentDataSet = Utils.normalize(currentDataSet, 50);
+
+                        File predict = new File(dir, "predict.data");
+                        writeToFile(Utils.dataToString(currentDataSet, "0"), predict);
+
+                        File model = new File(dir, "train.data.model");
+                        File output = new File(dir, "result.data");
                         try {
-                            String labelText = label.getText().toString();
-                            if (labelText.length() == 0)
-                                labelText = "0";
-
-                            FileOutputStream fos = new FileOutputStream(file, true);
-                            bw = new BufferedWriter(new OutputStreamWriter(fos));
-                            bw.write(Utils.trainingDataToString(currentTrainingDataSet, labelText));
-                            bw.newLine();
-                            bw.flush();
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
+                            int result = svm_predict.main(new String[]{
+                                    predict.toString(),
+                                    model.toString(),
+                                    output.toString()
+                            });
+                            label.setText(String.valueOf(result));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-
-                        if (controlFile) {
-                            try {
-                                bw.newLine();
-                                bw.flush();
-
-                                String scaleResult = svm_scale.main(new String[]{
-                                        "-r", "/sdcard/HCI/finalTrain.range.txt",
-                                        "/sdcard/HCI/test" + trainingDataSetCounter + ".txt"});
-
-                                FileWriter fw2 = new FileWriter("/sdcard/HCI/test"
-                                        + trainingDataSetCounter + ".txt.scale", false);
-                                BufferedWriter bw2 = new BufferedWriter(fw2); // 將BufferedWeiter與FileWrite物件做連結
-
-                                bw2.write(scaleResult);
-                                bw2.flush();
-
-                                index = svm_predict
-                                        .main(new String[]{
-                                                "/sdcard/HCI/test" + trainingDataSetCounter
-                                                        + ".txt.scale",
-                                                "/sdcard/HCI/finalTrain.model.txt",
-                                                "/sdcard/HCI/predict" + trainingDataSetCounter
-                                                        + ".txt"});
-                                // Log.d("index",""+index);
-                            } catch (IOException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            }
-                            startTraining = false;
-                            break;
-                        }
+                        break;
                 }
-                // TODO Auto-generated method stub
+                return false;
+            }
+        });
+
+        restartBtn.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                createOutputFile("train");
                 return false;
             }
         });
@@ -188,21 +198,6 @@ public class MainActivity extends Activity {
             accelerometerPresent = true;
             accelerometerSensor = sensorList.get(0);
 
-            String strSensor = "Name: " + accelerometerSensor.getName()
-                    + "\nVersion: "
-                    + String.valueOf(accelerometerSensor.getVersion())
-                    + "\nVendor: " + accelerometerSensor.getVendor()
-                    + "\nType: "
-                    + String.valueOf(accelerometerSensor.getType()) + "\nMax: "
-                    + String.valueOf(accelerometerSensor.getMaximumRange())
-                    + "\nResolution: "
-                    + String.valueOf(accelerometerSensor.getResolution())
-                    + "\nPower: "
-                    + String.valueOf(accelerometerSensor.getPower())
-                    + "\nClass: " + accelerometerSensor.getClass().toString();
-
-            // textInfo.setText(strSensor);
-
         } else {
             accelerometerPresent = false;
         }
@@ -215,9 +210,7 @@ public class MainActivity extends Activity {
 
                 @Override
                 public void call(Object... args) {
-                    //Log.d("[socket.io]", "EVENT_CONNECT");
                     socket.emit("foo", "hi");
-//                    socket.disconnect();
                 }
 
             }).on("event", new Emitter.Listener() {
@@ -307,7 +300,7 @@ public class MainActivity extends Activity {
             textZ.setText("Z: " + String.valueOf(z));
             inD.setText("ind: " + index);
             if (startTraining) {
-                currentTrainingDataSet.add(new Point(x, y, z));
+                currentDataSet.add(new Point(x, y, z));
             }
             preX = x;
             preY = y;

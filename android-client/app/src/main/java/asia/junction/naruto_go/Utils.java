@@ -32,7 +32,7 @@ public class Utils {
         return result;
     }
 
-    public static String trainingDataToString(List<Point> data, String label) {
+    public static String dataToString(List<Point> data, String label) {
 
         String result = label; // label
         int index = 1;
