@@ -30,30 +30,6 @@
             android:text="Z: " />
 
         <TextView
-            android:id="@+id/cusorX"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="cuX: " />
-
-        <TextView
-            android:id="@+id/cusorY"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="cuY: " />
-
-        <TextView
-            android:id="@+id/trueX"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="trX: " />
-
-        <TextView
-            android:id="@+id/trueY"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="trY: " />
-
-        <TextView
             android:id="@+id/inD"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

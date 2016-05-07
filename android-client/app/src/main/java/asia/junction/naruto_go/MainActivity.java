@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -43,7 +45,8 @@ public class MainActivity extends Activity {
     private Sensor accelerometerSensor;
     private BufferedWriter bw;
 
-    private TextView textX, textY, textZ, cusorX, cusorY, trueX, trueY, inD;
+    private File file;
+    private TextView textX, textY, textZ, inD;
     private Button btn;
     private EditText label;
 
@@ -51,10 +54,8 @@ public class MainActivity extends Activity {
     boolean controlFile = false;
 
     private int trainingDataSetCounter = 0;
-    private int trainingDataCounter = 0;
 
     private int index = -2;
-    private int mouseControl = 0;
 
     private List<List<Point>> allTrainingDataSet;
     private List<Point> currentTrainingDataSet;
@@ -66,6 +67,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         requestPermissionsIfDenied();
+        createOutputFile();
         findViews();
         initButtonListener();
         initSensorManager();
@@ -89,14 +91,20 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void createOutputFile() {
+        File dir = Environment.getExternalStorageDirectory();
+        dir = new File(dir, "naruto_go");
+        SimpleDateFormat dateFmt = new SimpleDateFormat("yyyyMMddhhmmss");
+        file = new File(dir, "train" + dateFmt.format(new Date()) + ".data");
+        if (dir.exists() == false) {
+            dir.mkdirs();
+        }
+    }
+
     private void findViews() {
         textX = (TextView) findViewById(R.id.textx);
         textY = (TextView) findViewById(R.id.texty);
         textZ = (TextView) findViewById(R.id.textz);
-        cusorX = (TextView) findViewById(R.id.cusorX);
-        cusorY = (TextView) findViewById(R.id.cusorY);
-        trueX = (TextView) findViewById(R.id.trueX);
-        trueY = (TextView) findViewById(R.id.trueY);
         inD = (TextView) findViewById(R.id.inD);
 
         btn = (Button) findViewById(R.id.btn);
@@ -114,25 +122,18 @@ public class MainActivity extends Activity {
                         currentTrainingDataSet = new ArrayList<>();
                         break;
                     case MotionEvent.ACTION_UP:
-
                         currentTrainingDataSet = Utils.normalize(currentTrainingDataSet, 50);
                         allTrainingDataSet.add(currentTrainingDataSet);
 
                         try {
-                            File dir = Environment.getExternalStorageDirectory();
-                            dir = new File(dir, "naruto_go");
-                            File file = new File(dir, "data_" + allTrainingDataSet.size() + ".text");
-                            if (dir.exists() == false) {
-                                dir.mkdirs();
-                            }
-
                             String labelText = label.getText().toString();
                             if (labelText.length() == 0)
                                 labelText = "0";
 
-                            FileOutputStream fos = new FileOutputStream(file);
+                            FileOutputStream fos = new FileOutputStream(file, true);
                             bw = new BufferedWriter(new OutputStreamWriter(fos));
                             bw.write(Utils.trainingDataToString(currentTrainingDataSet, labelText));
+                            bw.newLine();
                             bw.flush();
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
