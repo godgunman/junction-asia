@@ -1,6 +1,8 @@
 package asia.junction.naruto_go;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -41,6 +43,9 @@ public class MainActivity extends Activity {
     private int index = -2;
     private int mouseControl = 0;
 
+    private List<List<Point>> allTrainingDataSet;
+    private List<Point> currentTrainingDataSet;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +54,8 @@ public class MainActivity extends Activity {
         findViews();
         initButtonListener();
         initSensorManager();
+
+        allTrainingDataSet = new ArrayList<>();
     }
 
     private void findViews() {
@@ -74,17 +81,24 @@ public class MainActivity extends Activity {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         startTraining = true;
-                        trainingDataSetCounter++;
-                        trainingDataCounter = 0;
+                        currentTrainingDataSet = new ArrayList<>();
+                        break;
+                    case MotionEvent.ACTION_UP:
+
+                        currentTrainingDataSet = Utils.normalize(currentTrainingDataSet, 50);
+                        allTrainingDataSet.add(currentTrainingDataSet);
+
                         try {
-                            FileOutputStream fos = openFileOutput("data_" + trainingDataSetCounter + ".text", MODE_APPEND);
+                            FileOutputStream fos = openFileOutput("data_" + allTrainingDataSet.size() + ".text", MODE_APPEND);
                             bw = new BufferedWriter(new OutputStreamWriter(fos));
-                            bw.write("+4 ");
+                            bw.write(Utils.trainingDataToString(currentTrainingDataSet));
+                            bw.flush();
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        break;
-                    case MotionEvent.ACTION_UP:
+
                         if (controlFile) {
                             try {
                                 bw.newLine();
@@ -206,7 +220,7 @@ public class MainActivity extends Activity {
     private SensorEventListener accelerometerListener = new SensorEventListener() {
 
         boolean isFirst;
-        double threshold = 2.0;
+        double threshold = 1.3;
         double preX, preY, preZ;
 
         @Override
@@ -236,21 +250,7 @@ public class MainActivity extends Activity {
             textZ.setText("Z: " + String.valueOf(z));
             inD.setText("ind: " + index);
             if (startTraining) {
-                try {
-                    Log.d("acc", x + "," + y + "," + z);
-
-                    bw.write(String.valueOf(trainingDataCounter * 3) + ":"
-                            + String.valueOf(x) + " "
-                            + String.valueOf(trainingDataCounter * 3 + 1) + ":"
-                            + String.valueOf(y) + " "
-                            + String.valueOf(trainingDataCounter * 3 + 2) + ":"
-                            + String.valueOf(z) + " ");
-                    bw.flush();
-                    trainingDataCounter++;
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                currentTrainingDataSet.add(new Point(x, y, z));
             }
             preX = x;
             preY = y;
