@@ -19,11 +19,11 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,8 +38,9 @@ public class MainActivity extends Activity {
     private Sensor accelerometerSensor;
     private BufferedWriter bw;
 
-    private TextView textInfo, textX, textY, textZ, cusorX, cusorY, trueX, trueY, inD;
-    private Button btn, btn2;
+    private TextView textX, textY, textZ, cusorX, cusorY, trueX, trueY, inD;
+    private Button btn;
+    private EditText label;
 
     boolean startTraining = false;
     boolean controlFile = false;
@@ -68,7 +69,6 @@ public class MainActivity extends Activity {
     }
 
     private void findViews() {
-        // textInfo = (TextView) findViewById(R.id.info);
         textX = (TextView) findViewById(R.id.textx);
         textY = (TextView) findViewById(R.id.texty);
         textZ = (TextView) findViewById(R.id.textz);
@@ -79,7 +79,7 @@ public class MainActivity extends Activity {
         inD = (TextView) findViewById(R.id.inD);
 
         btn = (Button) findViewById(R.id.btn);
-        btn2 = (Button) findViewById(R.id.btn2);
+        label = (EditText)findViewById(R.id.label);
     }
 
     private void initButtonListener() {
@@ -105,9 +105,13 @@ public class MainActivity extends Activity {
                                 dir.mkdirs();
                             }
 
+                            String labelText = label.getText().toString();
+                            if (labelText.length() == 0)
+                                labelText = "0";
+
                             FileOutputStream fos = new FileOutputStream(file);
                             bw = new BufferedWriter(new OutputStreamWriter(fos));
-                            bw.write(Utils.trainingDataToString(currentTrainingDataSet));
+                            bw.write(Utils.trainingDataToString(currentTrainingDataSet, labelText));
                             bw.flush();
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
@@ -146,25 +150,6 @@ public class MainActivity extends Activity {
                             startTraining = false;
                             break;
                         }
-                }
-                // TODO Auto-generated method stub
-                return false;
-            }
-        });
-
-        btn2.setOnTouchListener(new OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        index = -2;
-                        mouseControl = 1;
-
-                        break;
-                    case MotionEvent.ACTION_UP:
-
-                        mouseControl = 0;
                 }
                 // TODO Auto-generated method stub
                 return false;

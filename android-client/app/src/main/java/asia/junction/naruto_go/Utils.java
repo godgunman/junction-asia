@@ -32,9 +32,9 @@ public class Utils {
         return result;
     }
 
-    public static String trainingDataToString(List<Point> data) {
+    public static String trainingDataToString(List<Point> data, String label) {
 
-        String result = "1"; // label
+        String result = label; // label
         int index = 1;
 
         for (int i = 0; i < data.size(); i++) {
