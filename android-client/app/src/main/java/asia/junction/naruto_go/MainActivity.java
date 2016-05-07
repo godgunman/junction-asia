@@ -214,7 +214,7 @@ public class MainActivity extends Activity {
 
                 @Override
                 public void call(Object... args) {
-                    Log.d("[socket.io]", "EVENT_CONNECT");
+                    //Log.d("[socket.io]", "EVENT_CONNECT");
                     socket.emit("foo", "hi");
 //                    socket.disconnect();
                 }
