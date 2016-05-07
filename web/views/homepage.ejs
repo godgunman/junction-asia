@@ -101,6 +101,18 @@
             io.socket.on('change', function gotHelloMessage (data) {
                 console.log(data);
                 var changeToTemp = data['temp'];
+                var icon = data['icon']; // cool
+                var left = $('<div>').attr('class', 'left').text(data['date']+'  '+data['time']);
+                var right = $('<div>').attr('class', 'right').text(data['content']);
+                var inf = $('<li>').append(left).append(right);
+
+                inf.hide().prependTo('ul').fadeIn('slow');
+                if ($('ul li').length > 5) {
+                  $('ul li:last-child').remove();
+                }
+
+                $('img.icon').attr('src', '/images/' + icon + '.png');
+
                 if (changeToTemp) {
                     $('#temp').text(changeToTemp);
                 }
@@ -130,9 +142,7 @@
         });
 
     </script>
-
     <body>
-
         <div class="top">
             <p id="header">AIR CONDITIONER @ COZY THEATER</p>
             <img class="indicate" src="/images/INDICATE.png"></img>
@@ -142,13 +152,12 @@
             <img class="modes" src="/images/MODES.png"></img>
 
             <ul>
-                <li><div class="left">2016-5-7  14:23</div> <div class="right">YIAN / COOL</div></a></li>
-            <li><div class="left">2016-5-7  14:23</div> <div class="right">JOHN / -4°C / FAN</div></a></li>
-        <li><div class="left">2016-5-7  14:23</div> <div class="right">ROAN / ON / 26°C / AUTO</div></a></li>
-
-</ul>
-</div>
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-
-  </body>
+<!--                 <li>
+                    <div class="left">2016-5-7  14:23</div>
+                    <div class="right">YIAN / COOL</div>
+                </li>
+-->            </ul>
+        </div>
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    </body>
 </html>
