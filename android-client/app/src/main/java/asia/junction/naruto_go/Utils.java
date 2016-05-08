@@ -74,33 +74,33 @@ public class Utils {
         String url = "";
 
         switch (result) {
-            case 0:
+            case -1:
                 url = Uri.parse("http://192.168.43.83:1337/sensor/change/switch").buildUpon()
                         .appendQueryParameter("mode", "game")
                         .appendQueryParameter("name", "ggm")
                         .build().toString();
                 break;
             case 1:
-                url = Uri.parse("http://192.168.43.83:1337/sensor/change/adjust").buildUpon()
-                        .appendQueryParameter("adjust", "1")
+                url = Uri.parse("http://192.168.43.83:1337/sensor/change/switch").buildUpon()
+                        .appendQueryParameter("mode", "prev")
                         .appendQueryParameter("name", "ggm")
                         .build().toString();
                 break;
-            case 2:
+            case 4:
                 url = Uri.parse("http://192.168.43.83:1337/sensor/change/adjust").buildUpon()
                         .appendQueryParameter("adjust", "-1")
                         .appendQueryParameter("name", "ggm")
                         .build().toString();
                 break;
-            case 3:
+            case 2:
                 url = Uri.parse("http://192.168.43.83:1337/sensor/change/switch").buildUpon()
                         .appendQueryParameter("mode", "next")
                         .appendQueryParameter("name", "ggm")
                         .build().toString();
                 break;
-            case 4:
-                url = Uri.parse("http://192.168.43.83:1337/sensor/change/switch").buildUpon()
-                        .appendQueryParameter("mode", "prev")
+            case 3:
+                url = Uri.parse("http://192.168.43.83:1337/sensor/change/adjust").buildUpon()
+                        .appendQueryParameter("adjust", "1")
                         .appendQueryParameter("name", "ggm")
                         .build().toString();
                 break;

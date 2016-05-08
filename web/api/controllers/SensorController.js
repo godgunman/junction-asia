@@ -8,7 +8,7 @@
 module.exports = {
 
     'change/:event': function(req, res) {
-        console.log(req.params);
+        console.log('[' + new Date() + ']', req.params, req.query);
         var io = sails.io;
         io.sockets.emit(req.params['event'], req.query);
         return res.json({

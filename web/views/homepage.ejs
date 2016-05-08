@@ -124,6 +124,7 @@
             ];
 
             io.socket.on('switch', function(data) {
+                console.log(data);
                 var mode = data['mode'];
                 var name = data['name'] || 'YIAN';
                 if (mode === 'next') {
@@ -149,6 +150,7 @@
             });
 
             io.socket.on('temp', function(data) {
+                console.log(data);
                 var currentTemp =
                     parseInt($('#temp').text().trim().replace('°C',''));
                 var adjust = parseInt(data['adjust']);

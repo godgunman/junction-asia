@@ -134,7 +134,6 @@ public class MainActivity extends Activity {
                         currentDataSet = new ArrayList<>();
                         break;
                     case MotionEvent.ACTION_UP:
-                        Utils.sendResultToServer(-1);
                         currentDataSet = Utils.normalize(currentDataSet, NORMALIZE_SIZE);
                         String labelText = label.getText().toString();
                         if (labelText.length() == 0)
@@ -157,7 +156,7 @@ public class MainActivity extends Activity {
                     case MotionEvent.ACTION_UP:
                         Log.d("debug", "currentDataSet.size: " + currentDataSet.size());
                         if (currentDataSet.size() > 150) {
-                            Utils.sendResultToServer(0);
+                            Utils.sendResultToServer(-1);
                         } else {
                             currentDataSet = Utils.normalize(currentDataSet, 50);
                             File predict = new File(dir, "predict.data");
@@ -171,8 +170,9 @@ public class MainActivity extends Activity {
                                         model.toString(),
                                         output.toString()
                                 });
-                                label.setText(String.valueOf(result));
                                 Utils.sendResultToServer(result);
+
+                                label.setText(String.valueOf(result));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
