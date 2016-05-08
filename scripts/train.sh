@@ -18,4 +18,5 @@ done
 cd "$(dirname "${BASH_SOURCE[0]}")"/..
 mv $TMPDATA $DATA
 ./libsvm/svm-train $DATA
-mv train.data.model data/train.data.model
+mv train.data.model $MODEL
+./libsvm/svm-predict $DATA $MODEL /dev/null
