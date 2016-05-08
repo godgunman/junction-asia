@@ -7,15 +7,13 @@
 
 module.exports = {
 
-    change: function(req, res) {
-//        sails.sockets.join(req, 'funSockets');
-//        sails.sockets.broadcast('funSockets', 'hello', req);
+    'change/:event': function(req, res) {
+        console.log(req.params);
         var io = sails.io;
-        io.sockets.emit('change', req.query);
-
+        io.sockets.emit(req.params['event'], req.query);
         return res.json({
             status: 'done.'
         });
-    }
+    },
 };
 
