@@ -92,6 +92,8 @@
     <script type="text/javascript">
 
         MODE_INDEX = 2;
+        MODE_GAME = false;
+        MODE_GAME_INDEX = 1;
 
         $(function() {
 
@@ -105,6 +107,10 @@
                 if ($('ul li').length > 7) {
                     $('ul li:last-child').remove();
                 }
+            }
+
+            var makeMario = function(index) {
+                $('img.icon').attr('src', '/images/mario/mario_' + index +'.png');
             }
 
             io.socket.on('change', function gotHelloMessage (data) {
@@ -127,16 +133,28 @@
                 console.log(data);
                 var mode = data['mode'];
                 var name = data['name'] || 'YIAN';
+
+                if (MODE_GAME == true) {
+                    MODE_INDEX = (MODE_INDEX + 1)%13;
+                    makeMario(MODE_INDEX);
+                    return ;
+                }
+
                 if (mode === 'next') {
                     MODE_INDEX = (MODE_INDEX + 1) % MODE.length;
                 } else if (mode === 'prev') {
                     MODE_INDEX = (MODE_INDEX + MODE.length - 1 ) % MODE.length; 
                 } else if (mode === 'game') {
+                    MODE_GAME = true;
                     $('div.top').css('background-color', 'rgb(110,245,189)')
                     $('#temp').text('GAME MODE');
                     $('img.icon').attr('src', '/images/mario/mario_01.png');
                     $('img.modes').remove();
                     $('#header').text('AIR CONDITIONER @ CRAZY THEATER')
+
+                    MODE_INDEX = 0;
+                    makeMario(MODE_INDEX);
+
                     addItem(name + '/switch mode to GAME MODE' );
                     return ;
                 } else {
@@ -149,8 +167,15 @@
                 addItem(name + '/switch mode to ' + MODE[MODE_INDEX]);
             });
 
+            MARIO = []
+
             io.socket.on('temp', function(data) {
                 console.log(data);
+                if (MODE_GAME == true) {
+                    MODE_INDEX = (MODE_INDEX + 1)%13;
+                    makeMario(MODE_INDEX);
+                    return ;
+                }
                 var currentTemp =
                     parseInt($('#temp').text().trim().replace('°C',''));
                 var adjust = parseInt(data['adjust']);
