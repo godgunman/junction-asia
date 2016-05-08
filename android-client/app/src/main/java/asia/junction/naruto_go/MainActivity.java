@@ -195,7 +195,7 @@ public class MainActivity extends Activity {
     private void initSensorManager() {
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         List<Sensor> sensorList = sensorManager
-                .getSensorList(Sensor.TYPE_ACCELEROMETER);
+                .getSensorList(Sensor.TYPE_LINEAR_ACCELERATION);
 
         if (sensorList.size() > 0) {
             accelerometerPresent = true;
