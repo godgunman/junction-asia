@@ -32,7 +32,6 @@
                 position:absolute;
                 top:110px;
                 right:60px;
-                width:100px;
                 height:100px;
             }
             img.indicate{
@@ -134,9 +133,11 @@
                 } else if (mode === 'game') {
                     $('div.top').css('background-color', 'rgb(110,245,189)')
                     $('#temp').text('GAME MODE');
-                    $('img.icon').remove();
+                    $('img.icon').attr('src', '/images/mario/mario_01.png');
                     $('img.modes').remove();
                     $('#header').text('AIR CONDITIONER @ CRAZY THEATER')
+                    addItem(name + '/switch mode to GAME MODE' );
+                    return ;
                 } else {
                     mode = parseInt(mode);
                     if (isNaN(mode) == false && mode >=0 && mode <MODE.length) {
