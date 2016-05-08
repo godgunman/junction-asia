@@ -37,8 +37,8 @@ import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
 public class MainActivity extends Activity {
-    private static final int WRITE_EXTERNAL_STORAGE_CODE = 10013;
-    private static final int NORMALIZE_SIZE = 150;
+    private static final int PERMISSION_REQUEST_CODE = 10013;
+    private static final int NORMALIZE_SIZE = 30;
 
     private SensorManager sensorManager;
     private boolean accelerometerPresent;
@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        requestPermissionsIfDenied();
+        requestPermissionsIfDenied(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         createOutputFile("train");
         findViews();
         initButtonListener();
@@ -67,17 +67,15 @@ public class MainActivity extends Activity {
         socketInit();
     }
 
-    private void requestPermissionsIfDenied() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    private void requestPermissionsIfDenied(String permission) {
+        if (ContextCompat.checkSelfPermission(this, permission)
                 != PackageManager.PERMISSION_GRANTED) {
 
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
             } else {
                 ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        WRITE_EXTERNAL_STORAGE_CODE);
+                        new String[]{ permission },
+                        PERMISSION_REQUEST_CODE);
             }
         }
     }

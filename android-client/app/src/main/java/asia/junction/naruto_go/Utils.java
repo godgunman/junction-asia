@@ -16,6 +16,7 @@ import cz.msebera.android.httpclient.Header;
  */
 public class Utils {
     public static List<Point> normalize(List<Point> data, int goalSize) {
+        Log.d("OriginalSize", String.valueOf(data.size()));
         List<Point> result = new ArrayList<>();
 
         if (data.size() == 0) return result;
@@ -45,9 +46,25 @@ public class Utils {
         int index = 1;
 
         for (int i = 0; i < data.size(); i++) {
-            result += String.format(" %d:%f", index++, data.get(i).x);
-            result += String.format(" %d:%f", index++, data.get(i).y);
-            result += String.format(" %d:%f", index++, data.get(i).z);
+            Point p = data.get(i);
+            double absX = Math.abs(p.x);
+            double absY = Math.abs(p.y);
+            double absZ = Math.abs(p.z);
+            if (absX >= absY && absX >= absZ) {
+                result += String.format(" %d:%d", index++, (int)(absX/p.x));
+            }
+            else
+                result += String.format(" %d:0", index++);
+            if (absY >= absX && absY >= absZ) {
+                result += String.format(" %d:%d", index++, (int)(absY/p.y));
+            }
+            else
+                result += String.format(" %d:0", index++);
+            if (absZ >= absX && absZ >= absY) {
+                result += String.format(" %d:%d", index++, (int)(absZ/p.z));
+            }
+            else
+                result += String.format(" %d:0", index++);
         }
 
         return result;
