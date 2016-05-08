@@ -160,24 +160,25 @@
             });
 
             $('#temp').bind("DOMSubtreeModified",function(){
-                var temp = $('#temp').text();
-                if(temp==='25°C')
+                var temp = $('#temp').text().replace('°C', '');
+                temp = parseInt(temp);
+                if(temp===25)
                     $('div.top').css('background-color', 'rgb(177,245,110)')
-                if(temp==='24°C')
+                else if(temp===24)
                     $('div.top').css('background-color', 'rgb(110,245,189)')
-                if(temp==='23°C')
+                else if(temp===23)
                     $('div.top').css('background-color', 'rgb(60,240,225)')
-                if(temp==='22°C')
+                else if(temp<=22)
                     $('div.top').css('background-color', 'rgb(60,190,240)')
-                if(temp==='26°C')
+                else if(temp===26)
                     $('div.top').css('background-color', 'rgb(255,230,105)')
-                if(temp==='27°C')
+                else if(temp===27)
                     $('div.top').css('background-color', 'rgb(255,190,105)')
-                if(temp==='28°C')
+                else if(temp===28)
                     $('div.top').css('background-color', 'rgb(255,140,105)')
-                if(temp==='29°C')
+                else if(temp===29)
                     $('div.top').css('background-color', 'rgb(255,105,105)')
-                if(temp==='30°C')
+                else if(temp>=30)
                     $('div.top').css('background-color', 'rgb(225,75,75)')
             });
         });
