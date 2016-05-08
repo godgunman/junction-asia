@@ -10,3 +10,4 @@ while [ -e $i ]; do
 done
 mkdir $i && cd $i
 adb pull /sdcard/naruto_go
+wc -l *.data
