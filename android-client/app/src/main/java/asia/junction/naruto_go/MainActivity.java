@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -74,7 +75,7 @@ public class MainActivity extends Activity {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
             } else {
                 ActivityCompat.requestPermissions(this,
-                        new String[]{ permission },
+                        new String[]{permission},
                         PERMISSION_REQUEST_CODE);
             }
         }
@@ -133,8 +134,8 @@ public class MainActivity extends Activity {
                         currentDataSet = new ArrayList<>();
                         break;
                     case MotionEvent.ACTION_UP:
+                        Utils.sendResultToServer(-1);
                         currentDataSet = Utils.normalize(currentDataSet, NORMALIZE_SIZE);
-
                         String labelText = label.getText().toString();
                         if (labelText.length() == 0)
                             labelText = "0";
@@ -154,23 +155,27 @@ public class MainActivity extends Activity {
                         currentDataSet = new ArrayList<>();
                         break;
                     case MotionEvent.ACTION_UP:
-                        currentDataSet = Utils.normalize(currentDataSet, 50);
+                        Log.d("debug", "currentDataSet.size: " + currentDataSet.size());
+                        if (currentDataSet.size() > 150) {
+                            Utils.sendResultToServer(0);
+                        } else {
+                            currentDataSet = Utils.normalize(currentDataSet, 50);
+                            File predict = new File(dir, "predict.data");
+                            writeToFile(Utils.dataToString(currentDataSet, "0"), predict);
 
-                        File predict = new File(dir, "predict.data");
-                        writeToFile(Utils.dataToString(currentDataSet, "0"), predict);
-
-                        File model = new File(dir, "train.data.model");
-                        File output = new File(dir, "result.data");
-                        try {
-                            int result = svm_predict.main(new String[]{
-                                    predict.toString(),
-                                    model.toString(),
-                                    output.toString()
-                            });
-                            label.setText(String.valueOf(result));
-                            Utils.sendResultToServer(result);
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                            File model = new File(dir, "train.data.model");
+                            File output = new File(dir, "result.data");
+                            try {
+                                int result = svm_predict.main(new String[]{
+                                        predict.toString(),
+                                        model.toString(),
+                                        output.toString()
+                                });
+                                label.setText(String.valueOf(result));
+                                Utils.sendResultToServer(result);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                         break;
                 }
