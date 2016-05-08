@@ -40,7 +40,6 @@ public class MainActivity extends Activity {
     private static final int WRITE_EXTERNAL_STORAGE_CODE = 10013;
     private static final int NORMALIZE_SIZE = 150;
 
-
     private SensorManager sensorManager;
     private boolean accelerometerPresent;
     private Sensor accelerometerSensor;

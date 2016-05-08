@@ -6,14 +6,10 @@ import android.util.Log;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 /**
  * Created by ggm on 5/7/16.
@@ -29,10 +25,9 @@ public class Utils {
             Point point = new Point();
 
             int floor_ii = (int) Math.floor(ii);
-            double part1 = (int) Math.ceil(ii) - ii;
-
             int ceil_ii = (int) Math.ceil(ii);
             double part2 = ii - (int) Math.floor(ii);
+            double part1 = 1 - part2;
 
             point.x = data.get(floor_ii).x * part1 + data.get(ceil_ii).x * part2;
             point.y = data.get(floor_ii).y * part1 + data.get(ceil_ii).y * part2;
@@ -50,8 +45,8 @@ public class Utils {
         int index = 1;
 
         for (int i = 0; i < data.size(); i++) {
-//            result += String.format(" %d:%f", index++, data.get(i).x);
-//            result += String.format(" %d:%f", index++, data.get(i).y);
+            result += String.format(" %d:%f", index++, data.get(i).x);
+            result += String.format(" %d:%f", index++, data.get(i).y);
             result += String.format(" %d:%f", index++, data.get(i).z);
         }
 
