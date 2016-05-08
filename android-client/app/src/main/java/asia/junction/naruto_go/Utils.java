@@ -87,7 +87,7 @@ public class Utils {
                         .build().toString();
                 break;
             case 4:
-                url = Uri.parse("http://192.168.43.83:1337/sensor/change/adjust").buildUpon()
+                url = Uri.parse("http://192.168.43.83:1337/sensor/change/temp").buildUpon()
                         .appendQueryParameter("adjust", "-1")
                         .appendQueryParameter("name", "ggm")
                         .build().toString();
@@ -99,7 +99,7 @@ public class Utils {
                         .build().toString();
                 break;
             case 3:
-                url = Uri.parse("http://192.168.43.83:1337/sensor/change/adjust").buildUpon()
+                url = Uri.parse("http://192.168.43.83:1337/sensor/change/temp").buildUpon()
                         .appendQueryParameter("adjust", "1")
                         .appendQueryParameter("name", "ggm")
                         .build().toString();
