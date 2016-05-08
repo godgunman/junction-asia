@@ -47,7 +47,7 @@ public class MainActivity extends Activity {
     private File dir, file;
     private TextView textX, textY, textZ;
     private Button learnBtn, predictBtn, restartBtn;
-    private EditText label;
+    private EditText label, user;
 
     boolean startTraining = false;
 
@@ -86,7 +86,7 @@ public class MainActivity extends Activity {
         if (null == dir) {
             dir = new File(Environment.getExternalStorageDirectory(), "naruto_go");
         }
-        SimpleDateFormat dateFmt = new SimpleDateFormat("yyyyMMddhhmmss");
+        SimpleDateFormat dateFmt = new SimpleDateFormat("hhmmss");
         file = new File(dir, prefix + dateFmt.format(new Date()) + ".data");
         if (dir.exists() == false) {
             dir.mkdirs();
@@ -121,6 +121,7 @@ public class MainActivity extends Activity {
         predictBtn = (Button) findViewById(R.id.predict);
         restartBtn = (Button) findViewById(R.id.restart);
         label = (EditText) findViewById(R.id.label);
+        user = (EditText) findViewById(R.id.user);
     }
 
     private void initButtonListener() {
@@ -182,7 +183,10 @@ public class MainActivity extends Activity {
         restartBtn.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                createOutputFile("train");
+                String prefix = user.getText().toString();
+                if (prefix.length() == 0)
+                    prefix = "train";
+                createOutputFile(prefix);
                 return false;
             }
         });
