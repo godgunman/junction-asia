@@ -71,8 +71,9 @@ class svm_predict {
 			
 			
 			++total;
-			int tmp[] = {0,0,1,2,0,3};
-			return tmp[(int) (v+1)];
+			//int tmp[] = {0,0,1,2,0,3};
+			//return tmp[(int) (v+1)];
+			return (int)v;
 		}
 		if (svm_type == svm_parameter.EPSILON_SVR
 				|| svm_type == svm_parameter.NU_SVR) {
