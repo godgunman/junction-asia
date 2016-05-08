@@ -4,11 +4,10 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Bootstrap 101 Template</title>
+        <title>Junction Asia Project</title>
 
         <!-- Bootstrap -->
-        <link href='https://fonts.googleapis.com/css?family=Work+Sans:200' rel='stylesheet' type='text/css'>
-        <link href='https://fonts.googleapis.com/css?family=Jura' rel='stylesheet' type='text/css'>
+        <link href='styles/font.css' rel='stylesheet' type='text/css'>
         <style>
             html, body, p {
               margin: 0px;
@@ -89,50 +88,98 @@
     </head>
     <script src="/js/dependencies/jquery.min.js"></script>
     <script src="/js/dependencies/sails.io.js"></script>
+    <script src="/js/dependencies/moment.js"></script>
 
     <script type="text/javascript">
 
+        MODE_INDEX = 2;
+
         $(function() {
+
+            var addItem = function(content) {
+                var currentDateTime = moment().format('YYYY-MM-DD hh:mm');
+                var left = $('<div>').attr('class', 'left').text(currentDateTime);
+                var right = $('<div>').attr('class', 'right').text(content);
+                var inf = $('<li>').append(left).append(right);
+
+                inf.hide().prependTo('ul').fadeIn('slow');
+                if ($('ul li').length > 7) {
+                    $('ul li:last-child').remove();
+                }
+            }
+
             io.socket.on('change', function gotHelloMessage (data) {
                 console.log(data);
                 var changeToTemp = data['temp'];
                 var icon = data['icon']; // cool
-                var left = $('<div>').attr('class', 'left').text(data['date']+'  '+data['time']);
-                var right = $('<div>').attr('class', 'right').text(data['content']);
-                var inf = $('<li>').append(left).append(right);
-
-                inf.hide().prependTo('ul').fadeIn('slow');
-                if ($('ul li').length > 5) {
-                  $('ul li:last-child').remove();
+                if (icon) {
+                    $('img.icon').attr('src', '/images/' + icon + '.png');
                 }
-
-                $('img.icon').attr('src', '/images/' + icon + '.png');
-
                 if (changeToTemp) {
-                    $('#temp').text(changeToTemp);
+                    $('#temp').text(changeToTemp+'°C');
                 }
             });
-            $('#temp').bind("DOMSubtreeModified",function(){
-                var temp = $('#temp').text();
-                if(temp==='25')
-                    $('div.top').css('background-color', 'rgb(177,245,110)')
-                if(temp==='24')
-                    $('div.top').css('background-color', 'rgb(110,245,189)')
-                if(temp==='23')
-                    $('div.top').css('background-color', 'rgb(60,240,225)')
-                if(temp==='22')
-                    $('div.top').css('background-color', 'rgb(60,190,240)')
-                if(temp==='26')
-                    $('div.top').css('background-color', 'rgb(255,230,105)')
-                if(temp==='27')
-                    $('div.top').css('background-color', 'rgb(255,190,105)')
-                if(temp==='28')
-                    $('div.top').css('background-color', 'rgb(255,140,105)')
-                if(temp==='29')
-                    $('div.top').css('background-color', 'rgb(255,105,105)')
-                if(temp==='30')
-                    $('div.top').css('background-color', 'rgb(225,75,75)')
 
+            var MODE = [
+                'COOL', 'MOISTURE', 'DEFAULT', 'FAN', 'HEAT'
+            ];
+
+            io.socket.on('switch', function(data) {
+                var mode = data['mode'];
+                var name = data['name'] || 'YIAN';
+                if (mode === 'next') {
+                    MODE_INDEX = (MODE_INDEX + 1) % MODE.length;
+                } else if (mode === 'prev') {
+                    MODE_INDEX = (MODE_INDEX + MODE.length - 1 ) % MODE.length; 
+                } else if (mode === 'game') {
+                    $('div.top').css('background-color', 'rgb(110,245,189)')
+                    $('#temp').text('GAME MODE');
+                    $('img.icon').remove();
+                    $('img.modes').remove();
+                    $('#header').text('AIR CONDITIONER @ CRAZY THEATER')
+                } else {
+                    mode = parseInt(mode);
+                    if (isNaN(mode) == false && mode >=0 && mode <MODE.length) {
+                        MODE_INDEX = mode;
+                    }
+                } 
+                $('img.icon').attr('src', '/images/' + MODE[MODE_INDEX] + '.png');
+                addItem(name + '/switch mode to ' + MODE[MODE_INDEX]);
+            });
+
+            io.socket.on('temp', function(data) {
+                var currentTemp =
+                    parseInt($('#temp').text().trim().replace('°C',''));
+                var adjust = parseInt(data['adjust']);
+                var name = data['name'] || 'YIAN';
+                if (adjust == undefined || adjust == null || isNaN(adjust))
+                    adjust = 0;
+                currentTemp += adjust
+                $('#temp').text(currentTemp+'°C');
+                addItem(name + '/temperature: ' + adjust);
+            });
+
+            $('#temp').bind("DOMSubtreeModified",function(){
+                var temp = $('#temp').text().replace('°C', '');
+                temp = parseInt(temp);
+                if(temp===25)
+                    $('div.top').css('background-color', 'rgb(177,245,110)')
+                else if(temp===24)
+                    $('div.top').css('background-color', 'rgb(110,245,189)')
+                else if(temp===23)
+                    $('div.top').css('background-color', 'rgb(60,240,225)')
+                else if(temp<=22)
+                    $('div.top').css('background-color', 'rgb(60,190,240)')
+                else if(temp===26)
+                    $('div.top').css('background-color', 'rgb(255,230,105)')
+                else if(temp===27)
+                    $('div.top').css('background-color', 'rgb(255,190,105)')
+                else if(temp===28)
+                    $('div.top').css('background-color', 'rgb(255,140,105)')
+                else if(temp===29)
+                    $('div.top').css('background-color', 'rgb(255,105,105)')
+                else if(temp>=30)
+                    $('div.top').css('background-color', 'rgb(225,75,75)')
             });
         });
 
@@ -147,11 +194,11 @@
             <img class="modes" src="/images/MODES.png"></img>
 
             <ul>
-<!--                 <li>
-                    <div class="left">2016-5-7  14:23</div>
-                    <div class="right">YIAN / COOL</div>
+                <li>
+                <div class="left">2016-05-07  14:23</div>
+                <div class="right">YIAN / COOL</div>
                 </li>
--->            </ul>
+            </ul>
         </div>
     </body>
 </html>
