@@ -7,8 +7,7 @@
         <title>Junction Asia Project</title>
 
         <!-- Bootstrap -->
-        <link href='https://fonts.googleapis.com/css?family=Work+Sans:200' rel='stylesheet' type='text/css'>
-        <link href='https://fonts.googleapis.com/css?family=Jura' rel='stylesheet' type='text/css'>
+        <link href='styles/font.css' rel='stylesheet' type='text/css'>
         <style>
             html, body, p {
               margin: 0px;
@@ -122,22 +121,30 @@
             });
 
             var MODE = [
-                'COOL.png', 'MOISTURE.png', 'DEFAULT.png', 'FAN.png', 'HEAT.png'
+                'COOL', 'MOISTURE', 'DEFAULT', 'FAN', 'HEAT'
             ];
 
             io.socket.on('switch', function(data) {
                 var mode = data['mode'];
+                var name = data['name'] || 'YIAN';
                 if (mode === 'next') {
                     MODE_INDEX = (MODE_INDEX + 1) % MODE.length;
                 } else if (mode === 'prev') {
                     MODE_INDEX = (MODE_INDEX + MODE.length - 1 ) % MODE.length; 
+                } else if (mode === 'game') {
+                    $('div.top').css('background-color', 'rgb(110,245,189)')
+                    $('#temp').text('GAME MODE');
+                    $('img.icon').remove();
+                    $('img.modes').remove();
+                    $('#header').text('AIR CONDITIONER @ CRAZY THEATER')
                 } else {
                     mode = parseInt(mode);
                     if (isNaN(mode) == false && mode >=0 && mode <MODE.length) {
                         MODE_INDEX = mode;
                     }
                 } 
-                $('img.icon').attr('src', '/images/' + MODE[MODE_INDEX]);
+                $('img.icon').attr('src', '/images/' + MODE[MODE_INDEX] + '.png');
+                addItem(name + '/switch mode to ' + MODE[MODE_INDEX]);
             });
 
             io.socket.on('temp', function(data) {
